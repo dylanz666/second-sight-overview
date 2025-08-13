@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后端服务连接监控</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        // 配置Tailwind自定义主题
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        success: '#36D399',
+                        warning: '#FBBD23',
+                        error: '#F87272',
+                        neutral: '#191D24',
+                        "base-100": '#FFFFFF',
+                        "base-200": '#F2F2F2',
+                        "base-300": '#E5E6E6',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+            .pulse-animation {
+                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            .fade-in {
+                animation: fadeIn 0.5s ease-in-out;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-base-200 min-h-screen flex flex-col min-h-screen">
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-server text-primary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-neutral">千里眼-远程桌面监控系统</h1>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span id="last-updated" class="text-sm text-gray-500 hidden md:inline-block">
+                    最后更新: 从未
+                </span>
+                <button id="refresh-btn" class="bg-primary hover:bg-primary/90 text-white px-3 py-1.5 rounded-md text-sm flex items-center transition-all">
+                    <i class="fa fa-refresh mr-1.5"></i>
+                    <span>刷新</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex-1">
+        <!-- 状态摘要卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white rounded-lg p-5 card-shadow border-l-4 border-primary">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">服务总数</p>
+                        <h3 id="total-services" class="text-3xl font-bold mt-1">0</h3>
+                    </div>
+                    <div class="bg-primary/10 p-3 rounded-full">
+                        <i class="fa fa-cubes text-primary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg p-5 card-shadow border-l-4 border-success">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">在线服务</p>
+                        <h3 id="online-services" class="text-3xl font-bold mt-1">0</h3>
+                    </div>
+                    <div class="bg-success/10 p-3 rounded-full">
+                        <i class="fa fa-check-circle text-success text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg p-5 card-shadow border-l-4 border-error">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">离线服务</p>
+                        <h3 id="offline-services" class="text-3xl font-bold mt-1">0</h3>
+                    </div>
+                    <div class="bg-error/10 p-3 rounded-full">
+                        <i class="fa fa-exclamation-circle text-error text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="loading" class="flex flex-col items-center justify-center py-16">
+            <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-gray-500">正在加载服务数据...</p>
+        </div>
+
+        <!-- 错误状态 -->
+        <div id="error" class="hidden bg-error/10 border border-error/20 rounded-lg p-5 mb-6">
+            <div class="flex items-start">
+                <i class="fa fa-exclamation-triangle text-error text-xl mt-0.5 mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-error">加载失败</h3>
+                    <p id="error-message" class="text-gray-600 mt-1">无法获取服务数据，请稍后重试。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 服务列表 -->
+        <div id="services-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+            <!-- 服务卡片将通过JavaScript动态插入 -->
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-base-300 w-full mt-12">
+        <div class="container mx-auto px-4 py-4 flex flex-col items-center justify-center text-gray-500 text-sm">
+            <p>千里眼-远程桌面监控系统 &copy; <span id="current-year"></span></p>
+            <p class="mt-1">数据来源: GitHub Gist API</p>
+        </div>
+    </footer>
+
+    <script>
+        const gist_url = 'https://api.github.com/gists/f04b26ce2b1b0685526b1e08282f469c';
+
+        // 设置当前年份
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        // 服务数据处理函数
+        async function fetchAndDisplayServices() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const servicesContainer = document.getElementById('services-container');
+            const errorMessage = document.getElementById('error-message');
+            
+            // 重置状态
+            loading.classList.remove('hidden');
+            error.classList.add('hidden');
+            servicesContainer.classList.add('hidden');
+            servicesContainer.innerHTML = '';
+            
+            try {
+                // 从GitHub Gist获取数据
+                const response = await fetch(gist_url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // 提取devices.json的内容
+                const devicesJson = data.files['devices.json'];
+                if (!devicesJson || !devicesJson.content) {
+                    throw new Error('未找到有效的设备数据');
+                }
+                
+                // 解析设备数据
+                const devices = JSON.parse(devicesJson.content);
+                const deviceIds = Object.keys(devices);
+                
+                // 更新统计信息
+                document.getElementById('total-services').textContent = deviceIds.length;
+                
+                // 模拟在线状态检测（实际应用中应替换为真实的连接检测）
+                let onlineCount = 0;
+                
+                // 创建服务卡片（顺序渲染，保证全部渲染后再绑定事件）
+                for (const deviceId of deviceIds) {
+                    const ipAddress = devices[deviceId];
+                    let isOnline = false;
+                    try {
+                        const pingResponse = await fetch(`http://${ipAddress}:8000/ping`);
+                        isOnline = pingResponse.ok;
+                    } catch (err) {
+                        console.error(`Ping failed for ${deviceId}:`, err);
+                        isOnline = false;
+                    }
+                    if (isOnline) onlineCount++;
+
+                    const statusClass = isOnline ? 'bg-success' : 'bg-error';
+                    const statusText = isOnline ? '在线' : '离线';
+                    const statusIcon = isOnline ? 'fa-check-circle' : 'fa-times-circle';
+                    const pulseClass = isOnline ? 'pulse-animation' : '';
+
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-lg overflow-hidden card-shadow fade-in';
+                    card.innerHTML = `
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="font-semibold text-lg">${deviceId}</h3>
+                                <span class="flex items-center ${statusClass} text-white text-xs px-2 py-1 rounded-full ${pulseClass}">
+                                    <i class="fa ${statusIcon} mr-1"></i> ${statusText}
+                                </span>
+                            </div>
+                            <div class="flex items-center text-gray-600 mb-4">
+                                <i class="fa fa-globe mr-2 text-primary"></i>
+                                <span>${ipAddress}</span>
+                            </div>
+                            <div class="flex justify-end space-x-2">
+                                <button class="test-connection-btn bg-base-200 hover:bg-base-300 text-gray-700 px-3 py-1.5 rounded-md text-sm transition-colors" data-ip="${ipAddress}" data-device="${deviceId}">
+                                    <i class="fa fa-ping mr-1"></i> 测试连接
+                                </button>
+                                <a href="http://${ipAddress}:8000" target="_blank" rel="noopener noreferrer" class="bg-primary hover:bg-primary/90 text-white px-3 py-1.5 rounded-md text-sm transition-colors flex items-center">
+                                    <i class="fa fa-cog mr-1"></i> 控制
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    servicesContainer.appendChild(card);
+                }
+                
+                // 等待所有卡片渲染后再绑定事件和更新统计
+                setTimeout(() => {
+                    // 统计在线/离线
+                    document.getElementById('online-services').textContent = onlineCount;
+                    document.getElementById('offline-services').textContent = deviceIds.length - onlineCount;
+
+                    // 绑定“测试连接”按钮事件（此时所有卡片已渲染）
+                    const testBtns = servicesContainer.querySelectorAll('.test-connection-btn');
+                    testBtns.forEach(btn => {
+                        // 用 replaceWith+cloneNode 彻底移除所有事件，防止多次绑定导致只第一次生效
+                        const newBtn = btn.cloneNode(true);
+                        btn.replaceWith(newBtn);
+                        newBtn.addEventListener('click', async function() {
+                            const ip = newBtn.getAttribute('data-ip');
+                            const device = newBtn.getAttribute('data-device');
+                            newBtn.disabled = true;
+                            newBtn.textContent = '测试中...';
+                            let result = '';
+                            let ok = false;
+                            try {
+                                const resp = await fetch(`http://${ip}:8000/ping`);
+                                ok = resp.ok;
+                            } catch (e) {
+                                ok = false;
+                            }
+                            if (ok) {
+                                result = `设备 ${device} (${ip}) 在线`;
+                            } else {
+                                result = `设备 ${device} (${ip}) 离线`;
+                            }
+                            // 更新卡片状态
+                            const card = newBtn.closest('.card-shadow');
+                            if (card) {
+                                const statusSpan = card.querySelector('span.flex.items-center');
+                                if (statusSpan) {
+                                    statusSpan.classList.remove('bg-success', 'bg-error', 'pulse-animation');
+                                    while (statusSpan.firstChild) {
+                                        statusSpan.removeChild(statusSpan.firstChild);
+                                    }
+                                    const icon = document.createElement('i');
+                                    icon.classList.add('fa', 'mr-1');
+                                    if (ok) {
+                                        statusSpan.classList.add('bg-success', 'pulse-animation');
+                                        icon.classList.add('fa-check-circle');
+                                        statusSpan.appendChild(icon);
+                                        statusSpan.append(' 在线');
+                                    } else {
+                                        statusSpan.classList.add('bg-error');
+                                        icon.classList.add('fa-times-circle');
+                                        statusSpan.appendChild(icon);
+                                        statusSpan.append(' 离线');
+                                    }
+                                }
+                            }
+                            alert(result);
+                            newBtn.disabled = false;
+                            newBtn.innerHTML = '<i class="fa fa-ping mr-1"></i> 测试连接';
+                        });
+                    });
+
+                    // 更新最后更新时间
+                    const now = new Date();
+                    document.getElementById('last-updated').textContent = `最后更新: ${now.toLocaleString()}`;
+
+                    // 显示服务列表，隐藏加载状态
+                    loading.classList.add('hidden');
+                    servicesContainer.classList.remove('hidden');
+                }, 100);
+                
+            } catch (err) {
+                console.error('获取服务数据失败:', err);
+                errorMessage.textContent = `错误: ${err.message}`;
+                loading.classList.add('hidden');
+                error.classList.remove('hidden');
+            }
+        }
+        
+        // 页面加载时获取数据
+        window.addEventListener('DOMContentLoaded', fetchAndDisplayServices);
+        
+        // 刷新按钮点击事件
+        document.getElementById('refresh-btn').addEventListener('click', fetchAndDisplayServices);
+    </script>
+</body>
+</html>
