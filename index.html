@@ -203,8 +203,9 @@
                 for (const deviceId of deviceIds) {
                     const ipAddress = devices[deviceId];
                     let isOnline = false;
+                    const protocol = window.location.protocol === 'https:' ? 'https' : 'http';
                     try {
-                        const pingResponse = await fetch(`http://${ipAddress}:8000/ping`);
+                        const pingResponse = await fetch(`${protocol}://${ipAddress}:8000/ping`);
                         isOnline = pingResponse.ok;
                     } catch (err) {
                         console.error(`Ping failed for ${deviceId}:`, err);
@@ -263,8 +264,9 @@
                             newBtn.textContent = '测试中...';
                             let result = '';
                             let ok = false;
+                            const protocol = window.location.protocol === 'https:' ? 'https' : 'http';
                             try {
-                                const resp = await fetch(`http://${ip}:8000/ping`);
+                                const resp = await fetch(`${protocol}://${ip}:8000/ping`);
                                 ok = resp.ok;
                             } catch (e) {
                                 ok = false;
