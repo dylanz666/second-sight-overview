@@ -204,7 +204,7 @@
                     const ipAddress = devices[deviceId];
                     let isOnline = false;
                     try {
-                        const pingResponse = await fetch(`http://${ipAddress}:8000/ping`);
+                        const pingResponse = await fetch(`https://${ipAddress}:8000/ping`);
                         isOnline = pingResponse.ok;
                     } catch (err) {
                         console.error(`Ping failed for ${deviceId}:`, err);
