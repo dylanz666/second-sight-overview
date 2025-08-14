@@ -204,7 +204,7 @@
                     const ipAddress = devices[deviceId];
                     let isOnline = false;
                     try {
-                        const pingResponse = await fetch(`https://${ipAddress}:8000/ping`);
+                        const pingResponse = await fetch(`https://${ipAddress}:8443/ping`);
                         isOnline = pingResponse.ok;
                     } catch (err) {
                         console.error(`Ping failed for ${deviceId}:`, err);
@@ -235,7 +235,7 @@
                                 <button class="test-connection-btn bg-base-200 hover:bg-base-300 text-gray-700 px-3 py-1.5 rounded-md text-sm transition-colors" data-ip="${ipAddress}" data-device="${deviceId}">
                                     <i class="fa fa-ping mr-1"></i> 测试连接
                                 </button>
-                                <a href="https://${ipAddress}:8000" target="_blank" rel="noopener noreferrer" class="bg-primary hover:bg-primary/90 text-white px-3 py-1.5 rounded-md text-sm transition-colors flex items-center">
+                                <a href="https://${ipAddress}:8443" target="_blank" rel="noopener noreferrer" class="bg-primary hover:bg-primary/90 text-white px-3 py-1.5 rounded-md text-sm transition-colors flex items-center">
                                     <i class="fa fa-cog mr-1"></i> 控制
                                 </a>
                             </div>
@@ -264,7 +264,7 @@
                             let result = '';
                             let ok = false;
                             try {
-                                const resp = await fetch(`https://${ip}:8000/ping`);
+                                const resp = await fetch(`https://${ip}:8443/ping`);
                                 ok = resp.ok;
                             } catch (e) {
                                 ok = false;
