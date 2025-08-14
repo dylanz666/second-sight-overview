@@ -264,7 +264,7 @@
                             let result = '';
                             let ok = false;
                             try {
-                                const resp = await fetch(`http://${ip}:8000/ping`);
+                                const resp = await fetch(`https://${ip}:8000/ping`);
                                 ok = resp.ok;
                             } catch (e) {
                                 ok = false;
