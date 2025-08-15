@@ -1,44 +1,13 @@
-const gist_url = 'https://api.github.com/gists/f04b26ce2b1b0685526b1e08282f469c';
-const network_time_api = 'https://worldtimeapi.org/api/ip';
-
 // 设置当前年份
 document.getElementById('current-year').textContent = new Date().getFullYear();
 
-async function getNetworkTimestamp() {
-    try {
-        const targetUrl = 'http://10.86.177.21:8000/ping';
-        const response = await fetch(targetUrl);
-        console.log(1111, response.text);
-        return new Date(response.headers.date).getTime() / 1000;
-    } catch {
-        return -1;
-    }
-}
-
-function getData() {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', "https://dylanz666.github.io/second-sight-overview/", true);
-    
-    xhr.onload = function() {
-        if (xhr.status >= 200 && xhr.status < 300) {
-            console.log('Header:', xhr.getResponseHeader('Date'));
-        } else {
-            console.error('Request failed with status:', xhr.status);
-        }
-    };
-
-    xhr.onerror = function() {
-        console.error('Request failed');
-    };
-
-    xhr.send();
-}
-
-getData();
-
 // 获取 gist 设备数据
 async function getDevicesFromGist() {
-    const response = await fetch(gist_url);
+    const response = await fetch(window.gistUrl, {
+        headers: {
+            'Authorization': window.gistToken
+        }
+    });
     if (!response.ok) throw new Error(`HTTP错误: ${response.status}`);
     const data = await response.json();
     const devicesJson = data.files['devices.json'];
@@ -103,6 +72,10 @@ function updateCardStatus(card, ok) {
     }
 }
 
+function getTimestamp() {
+    return Math.floor(Date.now() / 1000);
+}
+
 // 主函数
 async function fetchAndDisplayServices() {
     const loading = document.getElementById('loading');
@@ -116,7 +89,8 @@ async function fetchAndDisplayServices() {
     servicesContainer.innerHTML = '';
 
     try {
-        const netTimestamp = await getNetworkTimestamp();
+        // Get local timestamp
+        const currentTimestamp = getTimestamp();
         const devices = await getDevicesFromGist();
         const deviceIds = Object.keys(devices);
 
@@ -125,14 +99,9 @@ async function fetchAndDisplayServices() {
         let onlineCount = 0;
         deviceIds.forEach(deviceId => {
             const deviceInfo = devices[deviceId];
-            console.log("Device info:", deviceInfo);
             const lastTimestamp = typeof deviceInfo === "object" ? deviceInfo.timestamp : 0;
             // left 10 seconds for network delay
-            console.log("Checking device:", deviceId);
-            console.log("netTimestamp:",netTimestamp);
-            console.log("lastTimestamp:",lastTimestamp);
-            const isOnline = netTimestamp - lastTimestamp <= 130000 && netTimestamp > -1 && lastTimestamp > -1;
-            console.log(netTimestamp - lastTimestamp);
+            const isOnline = lastTimestamp > -1 && currentTimestamp - lastTimestamp <= 130000;            
             if (isOnline) onlineCount++;
             const card = renderDeviceCard(deviceId, deviceInfo, isOnline);
             servicesContainer.appendChild(card);
@@ -150,16 +119,14 @@ async function fetchAndDisplayServices() {
                 newBtn.textContent = '测试中...';
                 let ok = false, result = '';
                 try {
-                    const [netTimestamp2, devices2] = await Promise.all([
-                        getNetworkTimestamp(),
+                    const [currentTimestamp2, devices2] = await Promise.all([
+                        getTimestamp(),
                         getDevicesFromGist()
                     ]);
                     const deviceId = newBtn.getAttribute('data-device');
                     const deviceInfo2 = devices2[deviceId];
                     const lastTimestamp2 = typeof deviceInfo2 === "object" ? deviceInfo2.timestamp : 0;
-                    ok = netTimestamp2 - lastTimestamp2 <= 130000 && netTimestamp2 > -1 && lastTimestamp2 > -1;
-                    console.log(netTimestamp2, lastTimestamp2,netTimestamp2 - lastTimestamp2);
-                    console.log(ok);
+                    ok = currentTimestamp2 - lastTimestamp2 <= 130000 && currentTimestamp2 > -1 && lastTimestamp2 > -1;
                     result = ok
                         ? `设备 ${deviceId} 在线`
                         : `设备 ${deviceId} 离线`;
