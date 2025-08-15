@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>服务连接监控</title>
+    <title>Second Sight</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script>
@@ -70,15 +70,15 @@
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <i class="fa fa-server text-primary text-2xl"></i>
-                <h1 class="text-xl md:text-2xl font-bold text-neutral">千里眼-远程桌面监控系统</h1>
+                <h1 class="text-xl md:text-2xl font-bold text-neutral">Second Sight - Remote Desktop Monitoring System</h1>
             </div>
             <div class="flex items-center space-x-3">
                 <span id="last-updated" class="text-sm text-gray-500 hidden md:inline-block">
-                    最后更新: 从未
+                    Last updated: Never
                 </span>
                 <button id="refresh-btn" class="bg-primary hover:bg-primary/90 text-white px-3 py-1.5 rounded-md text-sm flex items-center transition-all">
                     <i class="fa fa-refresh mr-1.5"></i>
-                    <span>刷新</span>
+                    <span>Refresh</span>
                 </button>
             </div>
         </div>
@@ -90,7 +90,7 @@
             <div class="bg-white rounded-lg p-5 card-shadow border-l-4 border-primary">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-gray-500 text-sm">服务总数</p>
+                        <p class="text-gray-500 text-sm">Total Services</p>
                         <h3 id="total-services" class="text-3xl font-bold mt-1">0</h3>
                     </div>
                     <div class="bg-primary/10 p-3 rounded-full">
@@ -102,7 +102,7 @@
             <div class="bg-white rounded-lg p-5 card-shadow border-l-4 border-success">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-gray-500 text-sm">在线服务</p>
+                        <p class="text-gray-500 text-sm">Online Services</p>
                         <h3 id="online-services" class="text-3xl font-bold mt-1">0</h3>
                     </div>
                     <div class="bg-success/10 p-3 rounded-full">
@@ -114,7 +114,7 @@
             <div class="bg-white rounded-lg p-5 card-shadow border-l-4 border-error">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-gray-500 text-sm">离线服务</p>
+                        <p class="text-gray-500 text-sm">Offline Services</p>
                         <h3 id="offline-services" class="text-3xl font-bold mt-1">0</h3>
                     </div>
                     <div class="bg-error/10 p-3 rounded-full">
@@ -127,7 +127,7 @@
         <!-- 加载状态 -->
         <div id="loading" class="flex flex-col items-center justify-center py-16">
             <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p class="text-gray-500">正在加载服务数据...</p>
+            <p class="text-gray-500">Loading service data...</p>
         </div>
 
         <!-- 错误状态 -->
@@ -135,8 +135,8 @@
             <div class="flex items-start">
                 <i class="fa fa-exclamation-triangle text-error text-xl mt-0.5 mr-3"></i>
                 <div>
-                    <h3 class="font-semibold text-error">加载失败</h3>
-                    <p id="error-message" class="text-gray-600 mt-1">无法获取服务数据，请稍后重试。</p>
+                    <h3 class="font-semibold text-error">Load failed</h3>
+                    <p id="error-message" class="text-gray-600 mt-1">Unable to fetch service data, please try again later.</p>
                 </div>
             </div>
         </div>
@@ -149,8 +149,8 @@
 
     <footer class="bg-white border-t border-base-300 w-full mt-12">
         <div class="container mx-auto px-4 py-4 flex flex-col items-center justify-center text-gray-500 text-sm">
-            <p>千里眼-远程桌面监控系统 &copy; <span id="current-year"></span></p>
-            <p class="mt-1">数据来源: GitHub Gist API</p>
+            <p>Second Sight - Remote Desktop Monitoring System &copy; <span id="current-year"></span></p>
+            <p class="mt-1">Data source: GitHub Gist API</p>
         </div>
     </footer>
 

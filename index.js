@@ -1,29 +1,29 @@
-// 设置当前年份
+// Set current year
 document.getElementById('current-year').textContent = new Date().getFullYear();
 
-// 获取 gist 设备数据
+// Get gist device data
 async function getDevicesFromGist() {
-    // 解码 Base64 字符串
+    // Decode Base64 string
     const decodedStr = atob(window.gistToken);
-    // 将 UTF-8 编码转换回字符串
+    // Convert UTF-8 encoding back to string
     const token = decodeURIComponent(escape(decodedStr));
     const response = await fetch(window.gistUrl, {
         headers: {
             'Authorization': token
         }
     });
-    if (!response.ok) throw new Error(`HTTP错误: ${response.status}`);
+    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
     const data = await response.json();
     const devicesJson = data.files['devices.json'];
-    if (!devicesJson || !devicesJson.content) throw new Error('未找到有效的设备数据');
+    if (!devicesJson || !devicesJson.content) throw new Error('No valid device data found');
     return JSON.parse(devicesJson.content);
 }
 
-// 渲染服务卡片
+// Render device card
 function renderDeviceCard(deviceId, deviceInfo, isOnline) {
     const ipAddress = typeof deviceInfo === "object" ? deviceInfo.ip : deviceInfo;
     const statusClass = isOnline ? 'bg-success' : 'bg-error';
-    const statusText = isOnline ? '在线' : '离线';
+    const statusText = isOnline ? 'Online' : 'Offline';
     const statusIcon = isOnline ? 'fa-check-circle' : 'fa-times-circle';
     const pulseClass = isOnline ? 'pulse-animation' : '';
 
@@ -43,10 +43,10 @@ function renderDeviceCard(deviceId, deviceInfo, isOnline) {
             </div>
             <div class="flex justify-end space-x-2">
                 <button class="test-connection-btn bg-base-200 hover:bg-base-300 text-gray-700 px-3 py-1.5 rounded-md text-sm transition-colors" data-device="${deviceId}">
-                    <i class="fa fa-ping mr-1"></i> 测试连接
+                    <i class="fa fa-ping mr-1"></i> Test Connection
                 </button>
                 <a href="http://${ipAddress}:8000" target="_blank" rel="noopener noreferrer" class="bg-primary hover:bg-primary/90 text-white px-3 py-1.5 rounded-md text-sm transition-colors flex items-center">
-                    <i class="fa fa-cog mr-1"></i> 控制
+                    <i class="fa fa-cog mr-1"></i> Control
                 </a>
             </div>
         </div>
@@ -54,7 +54,7 @@ function renderDeviceCard(deviceId, deviceInfo, isOnline) {
     return card;
 }
 
-// 更新卡片状态
+// Update card status
 function updateCardStatus(card, ok) {
     const statusSpan = card.querySelector('span.flex.items-center');
     if (statusSpan) {
@@ -66,12 +66,12 @@ function updateCardStatus(card, ok) {
             statusSpan.classList.add('bg-success', 'pulse-animation');
             icon.classList.add('fa-check-circle');
             statusSpan.appendChild(icon);
-            statusSpan.append(' 在线');
+            statusSpan.append(' Online');
         } else {
             statusSpan.classList.add('bg-error');
             icon.classList.add('fa-times-circle');
             statusSpan.appendChild(icon);
-            statusSpan.append(' 离线');
+            statusSpan.append(' Offline');
         }
     }
 }
@@ -80,7 +80,7 @@ function getTimestamp() {
     return Math.floor(Date.now() / 1000);
 }
 
-// 主函数
+// Main function
 async function fetchAndDisplayServices() {
     const loading = document.getElementById('loading');
     const error = document.getElementById('error');
@@ -105,7 +105,7 @@ async function fetchAndDisplayServices() {
             const deviceInfo = devices[deviceId];
             const lastTimestamp = typeof deviceInfo === "object" ? deviceInfo.timestamp : 0;
             // left 10 seconds for network delay
-            const isOnline = lastTimestamp > -1 && currentTimestamp - lastTimestamp <= 130; 
+            const isOnline = lastTimestamp > -1 && currentTimestamp - lastTimestamp <= 130;
             if (isOnline) onlineCount++;
             const card = renderDeviceCard(deviceId, deviceInfo, isOnline);
             servicesContainer.appendChild(card);
@@ -114,13 +114,13 @@ async function fetchAndDisplayServices() {
         document.getElementById('online-services').textContent = onlineCount;
         document.getElementById('offline-services').textContent = deviceIds.length - onlineCount;
 
-        // 绑定“测试连接”按钮事件
+        // Bind "Test Connection" button event
         servicesContainer.querySelectorAll('.test-connection-btn').forEach(btn => {
             const newBtn = btn.cloneNode(true);
             btn.replaceWith(newBtn);
             newBtn.addEventListener('click', async function () {
                 newBtn.disabled = true;
-                newBtn.textContent = '测试中...';
+                newBtn.textContent = 'Testing...';
                 let ok = false, result = '';
                 try {
                     const [currentTimestamp2, devices2] = await Promise.all([
@@ -132,31 +132,31 @@ async function fetchAndDisplayServices() {
                     const lastTimestamp2 = typeof deviceInfo2 === "object" ? deviceInfo2.timestamp : 0;
                     ok = currentTimestamp2 - lastTimestamp2 <= 130 && currentTimestamp2 > -1 && lastTimestamp2 > -1;
                     result = ok
-                        ? `设备 ${deviceId} 在线（2分钟缓存）`
-                        : `设备 ${deviceId} 离线（2分钟缓存）`;
+                        ? `Device ${deviceId} online (2 min cache)`
+                        : `Device ${deviceId} offline (2 min cache)`;
                 } catch {
-                    result = `设备状态未知`;
+                    result = `Device status unknown`;
                 }
                 updateCardStatus(newBtn.closest('.card-shadow'), ok);
                 alert(result);
                 newBtn.disabled = false;
-                newBtn.innerHTML = '<i class="fa fa-ping mr-1"></i> 测试连接';
+                newBtn.innerHTML = '<i class="fa fa-ping mr-1"></i> Test Connection';
             });
         });
 
-        document.getElementById('last-updated').textContent = `最后更新: ${new Date().toLocaleString()}`;
+        document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleString()}`;
         loading.classList.add('hidden');
         servicesContainer.classList.remove('hidden');
     } catch (err) {
-        console.error('获取服务数据失败:', err);
-        if (errorMessage) errorMessage.textContent = `错误: ${err.message}`;
+        console.error('Failed to get service data:', err);
+        if (errorMessage) errorMessage.textContent = `Error: ${err.message}`;
         loading.classList.add('hidden');
         error.classList.remove('hidden');
     }
 }
 
-// 页面加载时获取数据
+// Fetch data on page load
 window.addEventListener('DOMContentLoaded', fetchAndDisplayServices);
 
-// 刷新按钮点击事件
+// Refresh button click event
 document.getElementById('refresh-btn').addEventListener('click', fetchAndDisplayServices);
