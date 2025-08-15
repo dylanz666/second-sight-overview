@@ -3,9 +3,13 @@ document.getElementById('current-year').textContent = new Date().getFullYear();
 
 // 获取 gist 设备数据
 async function getDevicesFromGist() {
+    // 解码 Base64 字符串
+    const decodedStr = atob(window.gistToken);
+    // 将 UTF-8 编码转换回字符串
+    const token = decodeURIComponent(escape(decodedStr));
     const response = await fetch(window.gistUrl, {
         headers: {
-            'Authorization': window.gistToken
+            'Authorization': token
         }
     });
     if (!response.ok) throw new Error(`HTTP错误: ${response.status}`);
