@@ -1,4 +1,6 @@
 const gist_url = 'https://api.github.com/gists/f04b26ce2b1b0685526b1e08282f469c';
+// 改为你自己的 github pages 域名，这样获取网络时间戳的方式可以避免跨域问题
+const network_time_url = 'https://dylanz666.github.io';
 
 // 设置当前年份
 document.getElementById('current-year').textContent = new Date().getFullYear();
@@ -20,7 +22,7 @@ async function fetchAndDisplayServices() {
         // 获取网络时间戳（用百度或其它公共服务）
         let netTimestamp = null;
         try {
-            const resp = await fetch("https://www.baidu.com", { method: "HEAD" });
+            const resp = await fetch(network_time_url, { method: "HEAD" });
             const dateStr = resp.headers.get("date");
             netTimestamp = Math.floor(new Date(dateStr).getTime() / 1000);
         } catch (e) {
@@ -104,7 +106,7 @@ async function fetchAndDisplayServices() {
                 // 重新获取gist和网络时间
                 let netTimestamp2 = null;
                 try {
-                    const resp = await fetch("https://www.baidu.com", { method: "HEAD" });
+                    const resp = await fetch(network_time_url, { method: "HEAD" });
                     const dateStr = resp.headers.get("date");
                     netTimestamp2 = Math.floor(new Date(dateStr).getTime() / 1000);
                 } catch (e) {
