@@ -21,7 +21,7 @@ function getData() {
     
     xhr.onload = function() {
         if (xhr.status >= 200 && xhr.status < 300) {
-            console.log('Header:', xhr.getAllResponseHeaders());
+            console.log('Header:', xhr.getResponseHeader('Date'));
         } else {
             console.error('Request failed with status:', xhr.status);
         }
