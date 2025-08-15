@@ -1,5 +1,4 @@
 const gist_url = 'https://api.github.com/gists/f04b26ce2b1b0685526b1e08282f469c';
-const network_time_url = 'https://dylanz666.github.io/second-sight-overview/';
 
 // 设置当前年份
 document.getElementById('current-year').textContent = new Date().getFullYear();
@@ -7,7 +6,7 @@ document.getElementById('current-year').textContent = new Date().getFullYear();
 // 获取网络时间戳（如失败则用本地时间）
 async function getNetworkTimestamp() {
     try {
-        const resp = await fetch(network_time_url, { method: "HEAD" });
+        const resp = await fetch(gist_url, { method: "HEAD" });
         const dateStr = resp.headers.get("date");
         return Math.floor(new Date(dateStr).getTime() / 1000);
     } catch {
