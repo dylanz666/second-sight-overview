@@ -1,18 +1,40 @@
 const gist_url = 'https://api.github.com/gists/f04b26ce2b1b0685526b1e08282f469c';
+const network_time_api = 'https://worldtimeapi.org/api/ip';
 
 // 设置当前年份
 document.getElementById('current-year').textContent = new Date().getFullYear();
 
 async function getNetworkTimestamp() {
     try {
-        const targetUrl = 'https://dylanz666.github.io/second-sight-overview/';
+        const targetUrl = 'http://10.86.177.21:8000/ping';
         const response = await fetch(targetUrl);
-        console.log(1111, response.headers);
+        console.log(1111, response.text);
         return new Date(response.headers.date).getTime() / 1000;
     } catch {
         return -1;
     }
 }
+
+function getData() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', "https://dylanz666.github.io/second-sight-overview/", true);
+    
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            console.log('Header:', xhr.getAllResponseHeaders());
+        } else {
+            console.error('Request failed with status:', xhr.status);
+        }
+    };
+
+    xhr.onerror = function() {
+        console.error('Request failed');
+    };
+
+    xhr.send();
+}
+
+getData();
 
 // 获取 gist 设备数据
 async function getDevicesFromGist() {
