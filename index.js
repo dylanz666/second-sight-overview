@@ -3,14 +3,14 @@ const gist_url = 'https://api.github.com/gists/f04b26ce2b1b0685526b1e08282f469c'
 // 设置当前年份
 document.getElementById('current-year').textContent = new Date().getFullYear();
 
-// 获取网络时间戳（如失败则用本地时间）
 async function getNetworkTimestamp() {
     try {
-        const resp = await fetch(gist_url, { method: "HEAD" });
-        const dateStr = resp.headers.get("date");
-        return Math.floor(new Date(dateStr).getTime() / 1000);
+        const targetUrl = 'https://dylanz666.github.io/second-sight-overview/';
+        const response = await fetch(targetUrl);
+        console.log(1111, response.headers);
+        return new Date(response.headers.date).getTime() / 1000;
     } catch {
-        return Math.floor(Date.now() / 1000);
+        return -1;
     }
 }
 
@@ -103,9 +103,14 @@ async function fetchAndDisplayServices() {
         let onlineCount = 0;
         deviceIds.forEach(deviceId => {
             const deviceInfo = devices[deviceId];
+            console.log("Device info:", deviceInfo);
             const lastTimestamp = typeof deviceInfo === "object" ? deviceInfo.timestamp : 0;
             // left 10 seconds for network delay
-            const isOnline = netTimestamp - lastTimestamp <= 130;
+            console.log("Checking device:", deviceId);
+            console.log("netTimestamp:",netTimestamp);
+            console.log("lastTimestamp:",lastTimestamp);
+            const isOnline = netTimestamp - lastTimestamp <= 130000 && netTimestamp > -1 && lastTimestamp > -1;
+            console.log(netTimestamp - lastTimestamp);
             if (isOnline) onlineCount++;
             const card = renderDeviceCard(deviceId, deviceInfo, isOnline);
             servicesContainer.appendChild(card);
@@ -130,7 +135,9 @@ async function fetchAndDisplayServices() {
                     const deviceId = newBtn.getAttribute('data-device');
                     const deviceInfo2 = devices2[deviceId];
                     const lastTimestamp2 = typeof deviceInfo2 === "object" ? deviceInfo2.timestamp : 0;
-                    ok = netTimestamp2 - lastTimestamp2 <= 120;
+                    ok = netTimestamp2 - lastTimestamp2 <= 130000 && netTimestamp2 > -1 && lastTimestamp2 > -1;
+                    console.log(netTimestamp2, lastTimestamp2,netTimestamp2 - lastTimestamp2);
+                    console.log(ok);
                     result = ok
                         ? `设备 ${deviceId} 在线`
                         : `设备 ${deviceId} 离线`;
