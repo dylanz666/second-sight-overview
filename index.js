@@ -105,7 +105,7 @@ async function fetchAndDisplayServices() {
             const deviceInfo = devices[deviceId];
             const lastTimestamp = typeof deviceInfo === "object" ? deviceInfo.timestamp : 0;
             // left 10 seconds for network delay
-            const isOnline = lastTimestamp > -1 && currentTimestamp - lastTimestamp <= 130000;            
+            const isOnline = lastTimestamp > -1 && currentTimestamp - lastTimestamp <= 130; 
             if (isOnline) onlineCount++;
             const card = renderDeviceCard(deviceId, deviceInfo, isOnline);
             servicesContainer.appendChild(card);
@@ -130,10 +130,10 @@ async function fetchAndDisplayServices() {
                     const deviceId = newBtn.getAttribute('data-device');
                     const deviceInfo2 = devices2[deviceId];
                     const lastTimestamp2 = typeof deviceInfo2 === "object" ? deviceInfo2.timestamp : 0;
-                    ok = currentTimestamp2 - lastTimestamp2 <= 130000 && currentTimestamp2 > -1 && lastTimestamp2 > -1;
+                    ok = currentTimestamp2 - lastTimestamp2 <= 130 && currentTimestamp2 > -1 && lastTimestamp2 > -1;
                     result = ok
-                        ? `设备 ${deviceId} 在线`
-                        : `设备 ${deviceId} 离线`;
+                        ? `设备 ${deviceId} 在线（2分钟缓存）`
+                        : `设备 ${deviceId} 离线（2分钟缓存）`;
                 } catch {
                     result = `设备状态未知`;
                 }
