@@ -1,5 +1,5 @@
 const gist_url = 'https://api.github.com/gists/f04b26ce2b1b0685526b1e08282f469c';
-const network_time_url = 'https://dylanz666.github.io';
+const network_time_url = 'https://dylanz666.github.io/second-sight-overview/';
 
 // 设置当前年份
 document.getElementById('current-year').textContent = new Date().getFullYear();
