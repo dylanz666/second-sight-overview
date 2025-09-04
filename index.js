@@ -105,7 +105,7 @@ async function fetchAndDisplayServices() {
             const deviceInfo = devices[deviceId];
             const lastTimestamp = typeof deviceInfo === "object" ? deviceInfo.timestamp : 0;
             // left 10 seconds for network delay
-            const isOnline = lastTimestamp > -1 && currentTimestamp - lastTimestamp <= 130;
+            const isOnline = lastTimestamp > -1 && currentTimestamp - lastTimestamp <= 150;
             if (isOnline) onlineCount++;
             const card = renderDeviceCard(deviceId, deviceInfo, isOnline);
             servicesContainer.appendChild(card);
@@ -130,7 +130,7 @@ async function fetchAndDisplayServices() {
                     const deviceId = newBtn.getAttribute('data-device');
                     const deviceInfo2 = devices2[deviceId];
                     const lastTimestamp2 = typeof deviceInfo2 === "object" ? deviceInfo2.timestamp : 0;
-                    ok = currentTimestamp2 - lastTimestamp2 <= 130 && currentTimestamp2 > -1 && lastTimestamp2 > -1;
+                    ok = currentTimestamp2 - lastTimestamp2 <= 150 && currentTimestamp2 > -1 && lastTimestamp2 > -1;
                     result = ok
                         ? `Device ${deviceId} online (2 min cache)`
                         : `Device ${deviceId} offline (2 min cache)`;
